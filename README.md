@@ -4,7 +4,7 @@ I was on the tech team and worked on game logic and level design. My initial res
 
 ## Timing
 
-As a complete beginner to Unreal, I didn't have a definitive idea for what method would work best for timing. Minimizing lag was the main goal, both for gameplay and because we intended to have the singers periodically switch depending on which player had higher health. Most tutorials I could find with rhythm games and Unreal used plugins, so I was kind of winging it from the start. I needed to identify a method where the backing instrumentals, vocals, and spawned notes would not get out of sync in the case of lag. It's also worth noting that I was doing all of the development for this game on an older Macbook, so lag was inevitable (which was both a good and a bad thing for timing testing).
+As a complete beginner to Unreal, I didn't have a definitive idea for what method would work best for timing. Most tutorials I could find with rhythm games and Unreal used plugins, so I was kind of winging it from the start. Minimizing lag was the main goal, both for gameplay and because we intended to have the singers periodically switch depending on which player had higher health. I needed to identify a method where the backing instrumentals, vocals, and spawned notes would not get out of sync in the case of lag. It's also worth noting that I was doing all of the development for this game on an older Macbook, so lag was inevitable (which was both a good and a bad thing for timing testing).
 
 Finding a method involved a lot of brainstorming and experimenting with different variations of similar systems, but the main two methods I tried were the combination of **data tables and a timer**, and spawning notes using a **level sequence event track**.
 
@@ -74,6 +74,16 @@ https://github.com/jdlogan0/chordclash-dev-portfolio/assets/143477762/41def0c9-3
 Unfortunately, the timing didn't always work that well. Even more unfortunately, it was never consistent, so I couldn't just set an offset and call it a day. I'd need to find a new method.
 
 ### Sequences
+
+While I couldn't find many tutorials about rhythm games in Unreal, there were tutorials for timing events to music using sequences. I hadn't wanted to use this method at first mostly because I wanted to leave open the possibility of changing note speed (a feature that some rhythm games have so that the notes don't get cramped in more difficult songs), which would be harder to implement in a sequence, where the tracks are pretty much set (the rigidity of sequences did end up coming back to haunt me later). That, and I wanted to see if there was a method where the timing of notes didn't have to be directly edited in Unreal. Neither of these things were a huge priority though, so I gave sequences a try.
+
+I still used Reaper to get the timing of notes correct, then created a sequence with the NoteSpawner bound to it. It had 4 trigger event tracks to easily keep track of which lanes a note was being fired from. I had all of the keys connected to an event in the NoteSpawner, with the lane as the only variable. Besides being a very tedious task, I also had some trouble with getting the keys bound to the event. When I went into properties, the correct event didn't always show up, and I kept accidentally creating new events. Looking back (after doing the same process for multiple songs), I think I had been messing up the way events were bound to tracks.
+
+When all of the keys were in the right spot, I dragged all of them back by two seconds (you can easily move all keys in a track at once) so that they would hit the bar at the correct time after moving downwards for two seconds.
+
+When I tested it, it was obvious that a) the timing worked really well, with no gap between the event firing and the note spawning, and b) lag messing with the sync was a non-issue because both the audio and the note spawning were tied to the sequence.
+
+**insert picture from test here**
 
 ## Player Input
 
