@@ -79,28 +79,53 @@ While I couldn't find many tutorials about rhythm games in Unreal, there were tu
 
 I still used Reaper to get the timing of notes correct, then created a sequence with the NoteSpawner bound to it. It had 4 trigger event tracks to easily keep track of which lanes a note was being fired from. I had all of the keys connected to an event in the NoteSpawner, with the lane as the only variable. Besides being a very tedious task, I also had some trouble with getting the keys bound to the event. When I went into properties, the correct event didn't always show up, and I kept accidentally creating new events. Looking back (after doing the same process for multiple songs), I think I had been messing up the way events were bound to tracks.
 
+*maybe screenshot of right clicking to show properties for a key*
+
 When all of the keys were in the right spot, I dragged all of them back by two seconds (you can easily move all keys in a track at once) so that they would hit the bar at the correct time after moving downwards for two seconds.
 
 When I tested it, it was obvious that a) the timing worked really well, with no gap between the event firing and the note spawning, and b) lag messing with the sync was a non-issue because both the audio and the note spawning were tied to the sequence.
 
 **insert picture from test here**
 
+## Note Queue
+
+When an arrow object is spawned, it is added to a queue. There are 8 queues: 1 per lane per player. When a note is spawned, it's added to the correct lane queue for both players. When the note is hit or moves past the area where it's considered a hit, it is removed from the queue. That way, when a player uses a key to hit a note, the note is taken from the correct lane queue so it's position can be checked, and the accuracy assessment is handled accordingly.
+
+I originally wanted to organize the queues with 2D arrays, only to discover that Unreal allow 2D arrays. You can't just make a 2D array, you need to make an array of structs, and those structs can contain arrays. I used maps instead:
+
+<p align = "center">
+<img width="750" alt="addToQueueOld" src="https://github.com/jdlogan0/chordclash-dev-portfolio/assets/143477762/6a01983f-6f89-49b4-ade1-b909599e5abe">
+<img width="650" alt="getQueue0Old" src="https://github.com/jdlogan0/chordclash-dev-portfolio/assets/143477762/e4495e7d-8d41-49a2-be48-bc82a8287c8f">
+</p>
+
+I tried to get this method of accessing the queues to work, with many different variations, but kept running into the issue of the function accessing "none". It's likely that I didn't initialize something correctly, but for the sake of time I needed to move on from using the maps and structs, even if it meant messier code.
+
+I ended up creating 8 arrays that are accessed using switch statements.
+
+*picture of actual setup here*
+
+When a note is accessed using a queue, the current position of the sprite is sent to a function that checks the accuracy. There are 4 ranges for a hit based on how close the current position is to the target position: Perfect, Great, Good, and Bad. Misses are handled separately. After a score is determined based on the ranges, the score is updated with another function. The NoteSpawner has an array of custom structs containing a score for each player. The index of this array corresponds to the number of the note (first note to spawn having a spawn number of 0). When the score is updated for a note, the function checks if both players' scores have been updated. If this is the case, then damage is calculated based on the difference in accuracy.
+
+*screenshot from check accuracy*
+
+When a note passes the range where it can be hit and removes itself from the queue, it sets the score to miss for any player that does not have a score already associated with that note.
+
+
 ## Player Input
 
 My unfamiliarity with Unreal made it really hard for me to figure out player input. I had somehow missed that you couldn't control regular actors with keys the the same way you could with pawns, and I couldn't understand why code that looked exactly the same as tutorials wasn't working.
 
 I finally made the NoteSpawner into a pawn, and everything fell into place up until I transitioned from my test project into the actual project. Skipping ahead a bit - since we had a set camera in the real game, the camera switching after the NoteSpawner was possessed posed a problem. There weren't clear answers for stopping this automatic switch, despite it feeling like something that should be a simple toggle, so I decided to make the NoteSpawner back into a regular actor and handle input a different way. Instead of the NoteSpawner directly firing off events from action mapping, the level blueprint does. It then uses a reference to NoteSpawner to call a function that handles the input. 
-
-## Note Queue
-
-When an arrow object is spawned, it is added to a queue. There are 8 queues: 1 per lane per player. I wanted to organize the queues with maps and 2D arrays, only to discover that Unreal doesn't play well with 2D arrays. You can't just make a 2D array, you need to make an array of structs, and those structs can contain arrays.
-
         
 > #### GitHub
 > 
 > This is the point where I finally moved from my test project to the actual repository. I'd used git before (and was using it more than ever with another class this term), but I had no clue how to use it with Unreal.
 > I asked a team member for help, and she walked me through setting up GitHub desktop.
 > In general, using GitHub for version control went very smoothly for us. We all actively communicated who was working with what Blueprints, so we rarely dealt with merge conflicts, and most were because of slight changes people accidentally made that could be ignored.
+
+## Implementing Powerups and Skills
+
+There were some powerups and skills that affected the calculations done by the NoteSpawner.
 
 ## Singer Switching
 
@@ -126,7 +151,11 @@ The last method I tried that still involved sequences was changing the bindings,
 
 Finally, I used audio played by the SingerManager, which had an event track on the sequence. On a switch, the volume would change depending on player health. I made sure both audio files were primed before the sequence so they would start immediately, and was surprised by how in sync they were. Then the sequence lagged, and the singers were ahead. To solve this, instead of playing once at the beginning of the sequence and changing volume, the audio is repeatedly played and stopped. The event on the sequence passes along the current time so the audio can be played from that moment. That way, if the sequence lags, the singers are only out of sync until the next switch.
 
+*screenshot from singer manager*
+
 ## Calibration
+
+In order for calibration to work, I needed to add an offset to the notespawner that would affect the calculations for accuracy and the timing for a note being removed from queues. The first step was simple - just subtracting the offset from the location before calculating the ranges. It was when I changed the way timing worked that I ran into problems. It was also when more art was added to the game, so working on my laptop went from laggy but playable (and actually good for testing if the offset calculations worked) to slow enough I couldn't tell if my changes were doing anything. Due to another class requiring long hours for group work, I didn't have much time to go to the lab and use the computers there. This made testing much more difficult as there were a lot of instances of having to ask my teammates to test my branch to check if things were working (a huge thank you to the teammates who put up with me constantly asking for tests).
 
 ## Other Challenges
 
@@ -134,3 +163,8 @@ Finally, I used audio played by the SingerManager, which had an event track on t
 ## Diagrams 
 
 ## Lessons Learned
+
+1. **Search often** - If you're having an issue, chances are someone else has too and took to the Unreal forums to ask about it. It's not a guarantee you'll find answers, but Unreal forums are often a good starting point.
+2. **Build early** - You don't want to be blindsided by a function behaving perfectly fine up until the build.
+3. **Sequences are not always the answer** - If you know you'll need to make changes at runtime with actors/audio involved in a sequence, it will be an issue.
+4. **You can delegate some tasks to other team members** - Looking back there were definitely some areas where I could've asked someone else to step in, and I would've had more time to work on other aspects of the game where I was running into more difficult issues.
