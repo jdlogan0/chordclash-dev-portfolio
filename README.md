@@ -4,9 +4,9 @@ I was on the tech team and worked on game logic and level design. My initial res
 
 ## Timing
 
-As a complete beginner to Unreal, I didn't have a definitive idea for what method would work best for timing. Most tutorials I could find with rhythm games and Unreal used plugins, so I was kind of winging it from the start. Minimizing lag was the main goal, both for gameplay and because we intended to have the singers periodically switch depending on which player had higher health. I needed to identify a method where the backing instrumentals, vocals, and spawned notes would not get out of sync in the case of lag. It's also worth noting that I was doing all of the development for this game on an older Macbook, so lag was inevitable (which was both a good and a bad thing for timing testing).
+As a complete beginner to Unreal, I didn't have a definitive idea for what method would work best for timing. Minimizing lag was the main goal, both for gameplay and because we intended to have the singers periodically switch depending on which player had higher health. I needed to identify a method where the backing instrumentals, vocals, and spawned notes would not get out of sync in the case of lag. It's also worth noting that I was doing most of the development for this game on an older laptop, so lag was inevitable (which was both a good and a bad thing for timing testing).
 
-Finding a method involved a lot of brainstorming and experimenting with different variations of similar systems, but the main two methods I tried were the combination of **data tables and a timer**, and spawning notes using a **level sequence event track**.
+The main two methods I tried were the combination of **data tables and a timer**, and spawning notes using a **level sequence event track**.
 
 ### Data Table + Timer
 
@@ -66,24 +66,19 @@ if (nextBeat == beatString) {
 ```
 In Blueprints, I just had the component start moving immediately with Begin Play.
 
-And it worked! Kind of! Here's one of the best tests I ran:
-
-
-https://github.com/jdlogan0/chordclash-dev-portfolio/assets/143477762/41def0c9-392e-4e87-adf4-ce9dcf061dd9
-
-Unfortunately, the timing didn't always work that well. Even more unfortunately, it was never consistent, so I couldn't just set an offset and call it a day. I'd need to find a new method.
+Unfortunately, the timing didn't always work well, with the song often playing slightly after notes started spawning. It was never consistent, so I couldn't just set an offset and call it a day. I'd need to find a new method.
 
 ### Sequences
 
-While I couldn't find many tutorials about rhythm games in Unreal, there were tutorials for timing events to music using sequences. I hadn't wanted to use this method at first mostly because I wanted to leave open the possibility of changing note speed (a feature that some rhythm games have so that the notes don't get cramped in more difficult songs), which would be harder to implement in a sequence, where the tracks are pretty much set (the rigidity of sequences did end up coming back to haunt me later). That, and I wanted to see if there was a method where the timing of notes didn't have to be directly edited in Unreal. Neither of these things were a huge priority though, so I gave sequences a try.
+While I couldn't find many tutorials related to rhythm games in Unreal (particularly those not involving plugins), there were tutorials for timing events to music using sequences. I hadn't wanted to use this method at first mostly because I wanted to leave open the possibility of changing note speed (a feature that some rhythm games have so that the notes don't get cramped in more difficult songs), which would be harder to implement in a sequence, where the tracks are relatively set in stone. That, and I wanted to see if there was a method where the timing of notes didn't have to be directly edited in Unreal. As neither of these things were a huge priority, sequences were worth trying.
 
-I still used Reaper to get the timing of notes correct, then created a sequence with the NoteSpawner bound to it. It had 4 trigger event tracks to easily keep track of which lanes a note was being fired from. I had all of the keys connected to an event in the NoteSpawner, with the lane as the only variable. Besides being a very tedious task, I also had some trouble with getting the keys bound to the event. When I went into properties, the correct event didn't always show up, and I kept accidentally creating new events. Looking back (after doing the same process for multiple songs), I think I had been messing up the way events were bound to tracks.
+I still used Reaper to get the timing of notes correct, then created a sequence with the NoteSpawner bound to it. It had a trigger event track with 4 sections to easily keep track of which lanes a note was being fired from. All of the keys connected to an event in the NoteSpawner, with the lane as the only variable. Besides being a very tedious task, I also had some trouble with getting the keys bound to the event. When I went into properties, the correct event didn't always show up, and I kept accidentally creating new events. Looking back (after doing the same process for multiple songs), there had likely been a key I was binding incorrectly and then copied, causing the issue to be present throughout the song.
 
 *maybe screenshot of right clicking to show properties for a key*
 
-When all of the keys were in the right spot, I dragged all of them back by two seconds (you can easily move all keys in a track at once) so that they would hit the bar at the correct time after moving downwards for two seconds.
+When all of the keys were in the right spot, I dragged all of them back by two seconds so that they would hit the bar at the correct time after moving downwards.
 
-When I tested it, it was obvious that a) the timing worked really well, with no gap between the event firing and the note spawning, and b) lag messing with the sync was a non-issue because both the audio and the note spawning were tied to the sequence.
+The timing worked very well, with no gap between the event firing and the note spawning, and lag messing with the sync was a non-issue because both the audio and the note spawning were tied to the sequence.
 
 **insert picture from test here**
 
@@ -110,30 +105,22 @@ When a note is accessed using a queue, the current position of the sprite is sen
 
 When a note passes the range where it can be hit and removes itself from the queue, it sets the score to miss for any player that does not have a score already associated with that note.
 
+When accuracy is calculated and scores are updated, the functions also take into accound powerups and skills that may affect these calculations. For example, if a player has the Auto Perfect powerup activated, their score will be changed to Perfect before damage is calculated.
+
 
 ## Player Input
 
-My unfamiliarity with Unreal made it really hard for me to figure out player input. I had somehow missed that you couldn't control regular actors with keys the the same way you could with pawns, and I couldn't understand why code that looked exactly the same as tutorials wasn't working.
+My unfamiliarity with Unreal made it really hard for me to figure out player input. I was trying to control regular actors with keys the the same way you would with pawns, and I couldn't tell why code that looked exactly the same as tutorials wasn't working.
 
-I finally made the NoteSpawner into a pawn, and everything fell into place up until I transitioned from my test project into the actual project. Skipping ahead a bit - since we had a set camera in the real game, the camera switching after the NoteSpawner was possessed posed a problem. There weren't clear answers for stopping this automatic switch, despite it feeling like something that should be a simple toggle, so I decided to make the NoteSpawner back into a regular actor and handle input a different way. Instead of the NoteSpawner directly firing off events from action mapping, the level blueprint does. It then uses a reference to NoteSpawner to call a function that handles the input. 
-        
-> #### GitHub
-> 
-> This is the point where I finally moved from my test project to the actual repository. I'd used git before (and was using it more than ever with another class this term), but I had no clue how to use it with Unreal.
-> I asked a team member for help, and she walked me through setting up GitHub desktop.
-> In general, using GitHub for version control went very smoothly for us. We all actively communicated who was working with what Blueprints, so we rarely dealt with merge conflicts, and most were because of slight changes people accidentally made that could be ignored.
-
-## Implementing Powerups and Skills
-
-There were some powerups and skills that affected the calculations done by the NoteSpawner.
+I finally made the NoteSpawner into a pawn, and everything fell into place up until I transitioned from my test project into the actual project. Since we had a set camera in the real game, the camera switching after the NoteSpawner was possessed posed a problem. There weren't clear answers for stopping this automatic switch, despite it feeling like something that should be a simple toggle, so I decided to make the NoteSpawner back into a regular actor and handle input a different way. Instead of the NoteSpawner directly firing off events from action mapping, the level blueprint does. It then uses a reference to NoteSpawner to call a function that handles the input. 
 
 ## Singer Switching
 
-One feature that I was set on including in our final product was the singers switching based on player health. It may not have been essential to gameplay, but it was one of my favorite quirks of the multiplayer game and I was *going* to make it work.
+One feature that I was set on including in our final product was the singers switching based on player health. It may not have been essential to gameplay, but it was one of my favorite quirks of the multiplayer game.
 
-Sequences aren’t really made for dynamic stuff - there are some options for making it dynamic, but it's not necessarily clear what *can't* be dynamic. 
+Sequences aren’t really made to be dynamically changed at runtime - there are some options available, but it's not necessarily clear what *can't* be dynamic. 
 
-I was initially able to get the switch to happen smoothly using subsequences. There were two subsequences that each had just the audio for the singer. An event track in the main sequence had keys for every point I wanted the singers to possibly switch (more or less every time, or whenever there was a pause). When the event was triggered, the correct subsequence was deactivated using loops to go through tracks and disable every section.
+I was initially able to get the switch to happen smoothly using subsequences. There were two subsequences that each had just the audio for the singer. An event track in the main sequence had keys for every point I wanted the singers to possibly switch. When the event was triggered, the correct subsequence was deactivated using loops to go through tracks and disable every section.
 
 <p align = "center">
   <img width="1274" alt="og_sequence" src="https://github.com/jdlogan0/chordclash-dev-portfolio/assets/143477762/ff655f84-f2ea-458d-bfe0-e2270690291a">
@@ -157,8 +144,11 @@ Finally, I used audio played by the SingerManager, which had an event track on t
 
 In order for calibration to work, I needed to add an offset to the notespawner that would affect the calculations for accuracy and the timing for a note being removed from queues. The first step was simple - just subtracting the offset from the location before calculating the ranges. It was when I changed the way timing worked that I ran into problems. It was also when more art was added to the game, so working on my laptop went from laggy but playable (and actually good for testing if the offset calculations worked) to slow enough I couldn't tell if my changes were doing anything. Due to another class requiring long hours for group work, I didn't have much time to go to the lab and use the computers there. This made testing much more difficult as there were a lot of instances of having to ask my teammates to test my branch to check if things were working (a huge thank you to the teammates who put up with me constantly asking for tests).
 
-## Other Challenges
+## Version Control
 
+We used GitHub as our version control software, which generally went smoothly for us. With Blueprints, you'll be forced to pick one version of the file over another if there is a merge conflict, so we had to be careful about what was being worked on at the same time. For our game there were enough separate parts that this wasn't a huge issue. We all actively communicated who was working with what Blueprints, so we rarely dealt with merge conflicts, and most were because of slight changes people accidentally made that could be ignored. There were only a few times where someone's work had to be overwritten. We also had it set up so any pull requests needed to be approved by two other people before they could be merged into main.
+
+We used channels in the team Discord server to effectively communicate changes that were made to avoid conflicts. There was a bot that updated us to any changes in the GitHub repository, a channel for telling team members when a pull request was made and asking for reviews, and a channel for people to say when they started and finished working with certain Blueprints.
         
 ## Diagrams 
 
@@ -166,5 +156,6 @@ In order for calibration to work, I needed to add an offset to the notespawner t
 
 1. **Search often** - If you're having an issue, chances are someone else has too and took to the Unreal forums to ask about it. It's not a guarantee you'll find answers, but Unreal forums are often a good starting point.
 2. **Build early** - You don't want to be blindsided by a function behaving perfectly fine up until the build.
-3. **Sequences are not always the answer** - If you know you'll need to make changes at runtime with actors/audio involved in a sequence, it will be an issue.
-4. **You can delegate some tasks to other team members** - Looking back there were definitely some areas where I could've asked someone else to step in, and I would've had more time to work on other aspects of the game where I was running into more difficult issues.
+3. **Try something else if you're stuck sooner rather than later** - There were a few times I was spending far too long on methods that I thought would work better (sequences rather than audio players for the singer switches being the most time consuming), when if I'd just tested the alternative earlier I would've found it worked fine.
+4. **Ask team members to step in** - Asking other team members to help with smaller tasks that I'd find along the way was very important to getting the project done. Worst case, nobody else will have time, but it's good to at least ask.
+5. **Sequences are not ideal if things need to change at runtime** - If you know you'll need to make changes at runtime with actors/audio involved in a sequence, it will be an issue. This isn't to say that you can't do anything dynamically with sequences, but it's limited.
