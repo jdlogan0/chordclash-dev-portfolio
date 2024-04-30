@@ -1,2 +1,3 @@
 title: Chord Clash Development Portfolio
-remote_theme: ankitsultana/researcher
+minima:
+  skin: dark
