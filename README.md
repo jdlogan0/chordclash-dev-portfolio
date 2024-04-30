@@ -1,7 +1,5 @@
 # Chord Clash Development
 
-**gameplay picture**
-
 Chord Clash is a two-player rhythm game where players deal damage to each other based on the accuracy of their hits, using powerups spawned during the games to gain advantages. I was on the tech team and worked on game logic and level design. My initial responsibilities included implementing a system for spawning notes timed to the rhythm of a song, moving the notes along a set path, and assessing player accuracy when hitting notes.
 
 ## Timing
@@ -84,7 +82,9 @@ I still used Reaper to get the timing of notes correct, then created a sequence 
 
 The timing worked with no gap between the event firing and the note spawning, and lag messing with the sync was a non-issue because both the audio and the note spawning were tied to the sequence.
 
-**insert picture from test here**
+<p align="center">
+  <img src = "/images/test.gif" alt = "test with sequences for timing">
+</p>
 
 ## Note Queue
 
@@ -168,13 +168,18 @@ We used GitHub as our version control software, which generally went smoothly fo
 We used channels in the team Discord server to effectively communicate changes that were made to avoid conflicts. There was a bot that updated us to any changes in the GitHub repository, a channel for telling team members when a pull request was made and asking for reviews, and a channel for people to say when they started and finished working with certain Blueprints.
         
 ## Architecture 
+
+I worked primarily with the NoteSpawner class Blueprint, Arrow Object class Blueprint, and sequence Blueprints. 
+
+Below is a rough statechart diagram of our game, with more detail for the Play Song state (the states pictured inside this one are referencing the NoteSpawner actor's actions during this period of the game).
+
 <p align="center">
   <img src = "/images/statechart.png" alt = "statechart diagram">
 </p>
 
 ## Lessons Learned
 
-1. **Search often** - If you're having an issue, chances are someone else has too and took to the Unreal forums to ask about it. It's not a guarantee you'll find answers, but Unreal forums are often a good starting point.
+1. **Search forums often** - If you're having an issue, chances are someone else has too and took to the Unreal forums to ask about it. It's not a guarantee you'll find answers, but Unreal forums are often a good starting point.
 2. **Build early** - You don't want to be blindsided by a function behaving perfectly fine up until the build.
 3. **Try something else if you're stuck sooner rather than later** - There were a few times I was spending far too long on methods that I thought would work better (sequences rather than audio players for the singer switches being the most time consuming), when if I'd just tested the alternative earlier I would've found it worked fine.
 4. **Ask team members to step in** - Asking other team members to help with smaller tasks that I'd find along the way was very important to getting the project done. Worst case, nobody else will have time, but it's good to at least ask.
