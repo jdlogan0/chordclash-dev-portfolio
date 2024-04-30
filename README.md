@@ -1,6 +1,8 @@
 # Chord Clash Development
 
-I was on the tech team and worked on game logic and level design. My initial responsibilities included implementing a system for spawning notes timed to the rhythm of a song, moving the notes along a set path, and assessing player accuracy when hitting notes.
+**gameplay picture**
+
+Chord Clash is a two-player rhythm game where players deal damage to each other based on the accuracy of their hits, using powerups spawned during the games to gain advantages. I was on the tech team and worked on game logic and level design. My initial responsibilities included implementing a system for spawning notes timed to the rhythm of a song, moving the notes along a set path, and assessing player accuracy when hitting notes.
 
 ## Timing
 
@@ -12,12 +14,14 @@ The main two methods I tried were the combination of **data tables and a timer**
 
 My initial attempt involved data tables and timers, using C++ rather than Blueprints. As a team we'd discussed the possibility of using data tables so that the timing could be inputed externally, so I decided to see how viable this method would be as a test.
 
-I first used Reaper to map out all of the times I wanted a note to play at a certain lane. I then inputed all of these times into a Google Sheet and exported the CSV.
+I first used [Reaper](https://www.reaper.fm/) to map out all of the times I wanted a note to play at a certain lane. These times were inputted into a Google Sheet and exported a CSV.
 <p align="center">
   <img width="506" alt="gnossienne_beatmap" src="https://github.com/jdlogan0/chordclash-dev-portfolio/assets/143477762/229f7bf9-1e7c-4c5c-8a2c-c63a3271e67e">
 </p>
 
-While reading from the data table wasn't too difficult, I struggled a lot with types in Unreal (FStrings and FNames weren't exactly intuitive). It took a few tries, but eventually I got the system in place! First, the information from the data table was put into an array:
+While reading from the data table wasn't too difficult, I struggled a lot with types in Unreal (FStrings and FNames weren't exactly intuitive). It took a few tries, but eventually I 
+
+First, the information from the data table was put into an array:
 
 ```
 SongDataTable = LoadObject<UDataTable>(nullptr, TEXT("/Game/SongData/Gnossienne"));
@@ -36,7 +40,7 @@ SongDataTable = LoadObject<UDataTable>(nullptr, TEXT("/Game/SongData/Gnossienne"
     }
 ```
 
-I then set up a timer that would go off every 0.125 seconds. Every time the timer was advanced, the variable for the current beat would be increased by 0.125, and compared to the nextBeat variable, which was set using information from the data table.
+A timer would go off every 0.125 seconds. Every time the timer was advanced, the variable for the current beat would be increased by 0.125, and compared to the nextBeat variable, which was set using information from the data table.
 ```
 GetWorldTimerManager().SetTimer(BeatTimerHandle, this, &ABeatCounter::AdvanceTimer, 0.125f, true);
 ```
@@ -64,21 +68,19 @@ if (nextBeat == beatString) {
         nextBeat = beatTimes[beatNumCurrent].ToString();
     }
 ```
-In Blueprints, I just had the component start moving immediately with Begin Play.
+In Blueprints, the component starts moving immediately with Begin Play.
 
 Unfortunately, the timing didn't always work well, with the song often playing slightly after notes started spawning. It was never consistent, so I couldn't just set an offset and call it a day. I'd need to find a new method.
 
 ### Sequences
 
-While I couldn't find many tutorials related to rhythm games in Unreal (particularly those not involving plugins), there were tutorials for timing events to music using sequences. I hadn't wanted to use this method at first mostly because I wanted to leave open the possibility of changing note speed (a feature that some rhythm games have so that the notes don't get cramped in more difficult songs), which would be harder to implement in a sequence, where the tracks are relatively set in stone. That, and I wanted to see if there was a method where the timing of notes didn't have to be directly edited in Unreal. As neither of these things were a huge priority, sequences were worth trying.
+While I couldn't find many tutorials related to rhythm games in Unreal (particularly those not involving plugins), there were tutorials for timing events to music using sequences. I hadn't wanted to use this method at first mostly because I wanted to leave open the possibility of changing note speed (a feature that some rhythm games have so that the notes don't get cramped in more difficult songs), which would be harder to implement in a sequence, where the tracks are relatively set in stone. I had also wanted to see if there was a method where the timing of notes didn't have to be directly edited in Unreal. As neither of these things were a huge priority, sequences were worth trying.
 
-I still used Reaper to get the timing of notes correct, then created a sequence with the NoteSpawner bound to it. It had a trigger event track with 4 sections to easily keep track of which lanes a note was being fired from. All of the keys connected to an event in the NoteSpawner, with the lane as the only variable. Besides being a very tedious task, I also had some trouble with getting the keys bound to the event. When I went into properties, the correct event didn't always show up, and I kept accidentally creating new events. Looking back (after doing the same process for multiple songs), there had likely been a key I was binding incorrectly and then copied, causing the issue to be present throughout the song.
+I still used Reaper to get the timing of notes correct, then created a sequence with an actor for spawning notes bound to it (this actor, NoteSpawner, handled most note-related functions). It had a trigger event track with 4 sections to easily keep track of which lanes a note was being fired from. All of the keys connected to an event in the NoteSpawner, with the lane as the only variable. When all of the keys were in the right spot, they were dragged back by two seconds so that they would hit the bar at the correct time after moving downwards. Besides being a very tedious task, I also had some trouble with getting the keys bound to the event. When I went into properties, the correct event didn't always show up, and I kept accidentally creating new events. Looking back (after doing the same process for multiple songs), there had likely been a key I was binding incorrectly and then copied, causing the issue to be present throughout the song.
 
 *maybe screenshot of right clicking to show properties for a key*
 
-When all of the keys were in the right spot, I dragged all of them back by two seconds so that they would hit the bar at the correct time after moving downwards.
-
-The timing worked very well, with no gap between the event firing and the note spawning, and lag messing with the sync was a non-issue because both the audio and the note spawning were tied to the sequence.
+The timing worked with no gap between the event firing and the note spawning, and lag messing with the sync was a non-issue because both the audio and the note spawning were tied to the sequence.
 
 **insert picture from test here**
 
@@ -110,7 +112,7 @@ When accuracy is calculated and scores are updated, the functions also take into
 
 ## Player Input
 
-My unfamiliarity with Unreal made it really hard for me to figure out player input. I was trying to control regular actors with keys the the same way you would with pawns, and I couldn't tell why code that looked exactly the same as tutorials wasn't working.
+My unfamiliarity with Unreal made it difficult for me to figure out player input. I was trying to control regular actors with keys the the same way you would with pawns, and I couldn't tell why code that looked exactly the same as tutorials wasn't working.
 
 I finally made the NoteSpawner into a pawn, and everything fell into place up until I transitioned from my test project into the actual project. Since we had a set camera in the real game, the camera switching after the NoteSpawner was possessed posed a problem. There weren't clear answers for stopping this automatic switch, despite it feeling like something that should be a simple toggle, so I decided to make the NoteSpawner back into a regular actor and handle input a different way. Instead of the NoteSpawner directly firing off events from action mapping, the level blueprint does. It then uses a reference to NoteSpawner to call a function that handles the input. 
 
@@ -118,7 +120,7 @@ I finally made the NoteSpawner into a pawn, and everything fell into place up un
 
 One feature that I was set on including in our final product was the singers switching based on player health. It may not have been essential to gameplay, but it was one of my favorite quirks of the multiplayer game.
 
-Sequences aren’t really made to be dynamically changed at runtime - there are some options available, but it's not necessarily clear what *can't* be dynamic. 
+I wanted to avoid using regular audio players for the singers because of lag. If the sequence were to lag and the singers were being controlled elsewhere, the singers would end up out of time with the sequence. Therefore, I tried to prioritize using sequences over other methods. This wasn't an easy task as sequences aren’t really made to be dynamically changed at runtime - there are some options available, but it's not necessarily clear what *can't* be dynamic. 
 
 I was initially able to get the switch to happen smoothly using subsequences. There were two subsequences that each had just the audio for the singer. An event track in the main sequence had keys for every point I wanted the singers to possibly switch. When the event was triggered, the correct subsequence was deactivated using loops to go through tracks and disable every section.
 
@@ -126,23 +128,23 @@ I was initially able to get the switch to happen smoothly using subsequences. Th
   <img width="1274" alt="og_sequence" src="https://github.com/jdlogan0/chordclash-dev-portfolio/assets/143477762/ff655f84-f2ea-458d-bfe0-e2270690291a">
 </p>
 
-This was honestly one of the things I was most excited about figuring out... and one of the things that bothered me most when it stopped working in the build.
-
 As it turns out, the set active function is just for development. Unlike functions like Print String that make it very clear they only function in development, I had no idea activating/deactivating sections wouldn't work until we built the project. 
 
-I wanted to avoid using regular audio players for the singers because of lag. If the sequence were to lag and the singers were being controlled elsewhere, the singers would end up out of time with the sequence. Therefore, I tried to prioritize using sequences over other methods.
+When it became clear that activation wouldn't work, my next attempt involved binding the audio track to Singer actors with audio attenuation, with a SingerManager actor to move them. When a singer needed to be deactivated, the singer would teleport far enough away that the audio wouldn't be present. This didn't work either because of how sequences function. During the sequence, the transform of a bound actor is controlled by the sequence, even if there's no transform track, which I hadn't realized. The singer would only move to the teleported position after the sequence ended.
 
-When it became clear that activation wouldn't work, my next attempt involved binding the audio track to Singer actors with audio attenuation, with a SingerManager actor to move them. When a singer needed to be deactivated, the singer would teleport far enough away that the audio wouldn't be present. A roundabout way of dealing with audio, but I was running out of ideas. Unfortunately, this didn't work either because of how sequences function. During the sequence, the transform of a bound actor is controlled by the sequence, even if there's no transform track, which I hadn't realized. The singer would only move to the teleported position after the sequence ended.
+The last method I tried that still involved sequences was changing the bindings, which can be done at runtime. The idea was that the binding would change from a close actor to an actor far away and vice versa depending on health. There were a couple tutorials on this, so I had an idea of what needed to be done, but I wasn't able to successfully implement. It's a method that I would like to go back to, as the main reason I moved on was for time's sake. 
 
-The last method I tried that still involved sequences was changing the bindings, which can be done at runtime. The idea was that the binding would change from a close actor to an actor far away and vice versa depending on health. There were a couple tutorials on this, so I had an idea of what needed to be done, but I wasn't able to successfully implement. It's a method that I would like to go back to, as the main reason I moved on was for time's sake. By this point I had already spent a couple days just trying to get the singer switch to work, and it wasn't even vital to gameplay. I needed to move on from sequences.
-
-Finally, I used audio played by the SingerManager, which had an event track on the sequence. On a switch, the volume would change depending on player health. I made sure both audio files were primed before the sequence so they would start immediately, and was surprised by how in sync they were. Then the sequence lagged, and the singers were ahead. To solve this, instead of playing once at the beginning of the sequence and changing volume, the audio is repeatedly played and stopped. The event on the sequence passes along the current time so the audio can be played from that moment. That way, if the sequence lags, the singers are only out of sync until the next switch.
+Finally, I used audio played by a SingerManager actor, which had an event track on the sequence. On a switch, the volume would change depending on player health. Both audio files were primed before the sequence so they would start immediately in sync with the sequence. When the sequence lagged, and the singers were ahead. To solve this, instead of playing once at the beginning of the sequence and changing volume, the audio is repeatedly played and stopped. The switch event on the sequence passes along the current time so the audio can be played from that moment. That way, if the sequence lags, the singers are only out of sync until the next switch.
 
 *screenshot from singer manager*
 
 ## Calibration
 
-In order for calibration to work, I needed to add an offset to the notespawner that would affect the calculations for accuracy and the timing for a note being removed from queues. The first step was simple - just subtracting the offset from the location before calculating the ranges. It was when I changed the way timing worked that I ran into problems. It was also when more art was added to the game, so working on my laptop went from laggy but playable (and actually good for testing if the offset calculations worked) to slow enough I couldn't tell if my changes were doing anything. Due to another class requiring long hours for group work, I didn't have much time to go to the lab and use the computers there. This made testing much more difficult as there were a lot of instances of having to ask my teammates to test my branch to check if things were working (a huge thank you to the teammates who put up with me constantly asking for tests).
+An offset was added to the notespawner that would affect the calculations for accuracy and the timing for a note being removed from queues. The first step was simple - just subtracting the offset from the location before checking the ranges. It was when I changed the way timing worked to allow for more time before removing a note from the queue that I ran into problems. It was also when more art was added to the game, so working on my laptop went from laggy but playable (and actually good for testing if the offset calculations worked) to slow enough I couldn't always tell if my changes were doing anything. Due to another class requiring long hours for group work, I didn't have much time to go to the lab and use the computers there. This made testing much more difficult as there were a lot of instances of having to ask my teammates to test my branch to check if things were working. 
+
+The removal from queue call happens after the note finishes moving just past the bar, so I was able to fix the issues with the queue removal timing by changing movement rather than adding delays. The note moves further down, with the distance and timing dependent on the offset. There is no visual difference, but it ensures a note will not be removed before the player has the chance to hit it.
+
+**movement screenshot**
 
 ## Version Control
 
