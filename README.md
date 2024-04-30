@@ -19,7 +19,7 @@ I first used [Reaper](https://www.reaper.fm/) to map out all of the times I want
   <img width="506" alt="gnossienne_beatmap" src="https://github.com/jdlogan0/chordclash-dev-portfolio/assets/143477762/229f7bf9-1e7c-4c5c-8a2c-c63a3271e67e">
 </p>
 
-While reading from the data table wasn't too difficult, I struggled a lot with types in Unreal (FStrings and FNames weren't exactly intuitive). It took a few tries, but eventually I 
+While reading from the data table wasn't too difficult, I struggled a lot with types in Unreal (FStrings and FNames weren't exactly intuitive).
 
 First, the information from the data table was put into an array:
 
@@ -70,7 +70,7 @@ if (nextBeat == beatString) {
 ```
 In Blueprints, the component starts moving immediately with Begin Play.
 
-Unfortunately, the timing didn't always work well, with the song often playing slightly after notes started spawning. It was never consistent, so I couldn't just set an offset and call it a day. I'd need to find a new method.
+Unfortunately, the timing didn't always work well, with the song often playing slightly after notes started spawning. It was never consistent, so I couldn't just set an offset and call it a day.
 
 ### Sequences
 
@@ -88,7 +88,7 @@ The timing worked with no gap between the event firing and the note spawning, an
 
 When an arrow object is spawned, it is added to a queue. There are 8 queues: 1 per lane per player. When a note is spawned, it's added to the correct lane queue for both players. When the note is hit or moves past the area where it's considered a hit, it is removed from the queue. That way, when a player uses a key to hit a note, the note is taken from the correct lane queue so it's position can be checked, and the accuracy assessment is handled accordingly.
 
-I originally wanted to organize the queues with 2D arrays, only to discover that Unreal allow 2D arrays. You can't just make a 2D array, you need to make an array of structs, and those structs can contain arrays. I used maps instead:
+I originally wanted to organize the queues with 2D arrays, only to discover that Unreal doesn't allow 2D arrays. You can't just make a 2D array, you need to make an array of structs, and those structs can contain arrays. I used maps instead:
 
 <p align = "center">
 <img width="750" alt="addToQueueOld" src="https://github.com/jdlogan0/chordclash-dev-portfolio/assets/143477762/6a01983f-6f89-49b4-ade1-b909599e5abe">
@@ -130,9 +130,9 @@ I was initially able to get the switch to happen smoothly using subsequences. Th
 
 As it turns out, the set active function is just for development. Unlike functions like Print String that make it very clear they only function in development, I had no idea activating/deactivating sections wouldn't work until we built the project. 
 
-When it became clear that activation wouldn't work, my next attempt involved binding the audio track to Singer actors with audio attenuation, with a SingerManager actor to move them. When a singer needed to be deactivated, the singer would teleport far enough away that the audio wouldn't be present. This didn't work either because of how sequences function. During the sequence, the transform of a bound actor is controlled by the sequence, even if there's no transform track, which I hadn't realized. The singer would only move to the teleported position after the sequence ended.
+When it became clear that activation wouldn't work, my next attempt involved binding the audio track to Singer actors with audio attenuation, with a new SingerManager actor to move them. When a singer needed to be deactivated, the singer would teleport far enough away that the audio wouldn't be present. This didn't work either because for the duration of a sequence, the transform of a bound actor is controlled by the sequence even if there's no transform track, which I hadn't realized. The singer would only move to the teleported position after the sequence ended.
 
-The last method I tried that still involved sequences was changing the bindings, which can be done at runtime. The idea was that the binding would change from a close actor to an actor far away and vice versa depending on health. There were a couple tutorials on this, so I had an idea of what needed to be done, but I wasn't able to successfully implement. It's a method that I would like to go back to, as the main reason I moved on was for time's sake. 
+The last method I tried that still involved sequences was changing the bindings, which can be done at runtime. The idea was that the binding would change from a close actor to an actor far away and vice versa depending on health. There were a couple tutorials on this, so I had an idea of what needed to be done, but I wasn't able to successfully implement it. It's a method that I would like to go back to, as the main reason I moved on was for time's sake. 
 
 Finally, I used audio played by a SingerManager actor, which had an event track on the sequence. On a switch, the volume would change depending on player health. Both audio files were primed before the sequence so they would start immediately in sync with the sequence. When the sequence lagged, and the singers were ahead. To solve this, instead of playing once at the beginning of the sequence and changing volume, the audio is repeatedly played and stopped. The switch event on the sequence passes along the current time so the audio can be played from that moment. That way, if the sequence lags, the singers are only out of sync until the next switch.
 
@@ -140,7 +140,7 @@ Finally, I used audio played by a SingerManager actor, which had an event track 
 
 ## Calibration
 
-An offset was added to the notespawner that would affect the calculations for accuracy and the timing for a note being removed from queues. The first step was simple - just subtracting the offset from the location before checking the ranges. It was when I changed the way timing worked to allow for more time before removing a note from the queue that I ran into problems. It was also when more art was added to the game, so working on my laptop went from laggy but playable (and actually good for testing if the offset calculations worked) to slow enough I couldn't always tell if my changes were doing anything. Due to another class requiring long hours for group work, I didn't have much time to go to the lab and use the computers there. This made testing much more difficult as there were a lot of instances of having to ask my teammates to test my branch to check if things were working. 
+An offset was added to the notespawner that would affect the calculations for accuracy and the timing for a note being removed from queues. The first step was simple - just subtracting the offset from the location before checking the ranges. It was when I changed the way timing worked to allow for more time before removing a note from the queue that I ran into problems. It was also when more art was added to the game, so working on my laptop went from laggy but playable (and actually good for testing if the offset calculations worked) to slow enough I couldn't always tell if my changes were doing anything. This made testing much more difficult as there were many instances of having to ask my teammates to test my branch to check if things were working. 
 
 The removal from queue call happens after the note finishes moving just past the bar, so I was able to fix the issues with the queue removal timing by changing movement rather than adding delays. The note moves further down, with the distance and timing dependent on the offset. There is no visual difference, but it ensures a note will not be removed before the player has the chance to hit it.
 
