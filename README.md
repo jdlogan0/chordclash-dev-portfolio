@@ -159,6 +159,8 @@ The removal from queue call happens after the note finishes moving just past the
   <img src = "/images/movementOffset.png" alt = "movement with offset">
 </p>
 
+To calibrate, players manually adjust the offset while playing a calibration sequence that plays the same note over and over again.
+
 ## Version Control
 
 We used GitHub as our version control software, which generally went smoothly for us. With Blueprints, you'll be forced to pick one version of the file over another if there is a merge conflict, so we had to be careful about what was being worked on at the same time. For our game there were enough separate parts that this wasn't a huge issue. We all actively communicated who was working with what Blueprints, so we rarely dealt with merge conflicts, and most were because of slight changes people accidentally made that could be ignored. There were only a few times where someone's work had to be overwritten. We also had it set up so any pull requests needed to be approved by two other people before they could be merged into main.
