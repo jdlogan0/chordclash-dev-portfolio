@@ -16,7 +16,7 @@ My initial attempt involved data tables and timers, using C++ rather than Bluepr
 
 I first used [Reaper](https://www.reaper.fm/) to map out all of the times I wanted a note to play at a certain lane. These times were inputted into a Google Sheet and exported a CSV.
 <p align="center">
-  <img width="506" alt="gnossienne_beatmap" src="https://github.com/jdlogan0/chordclash-dev-portfolio/assets/143477762/229f7bf9-1e7c-4c5c-8a2c-c63a3271e67e">
+  <img src = "/images/gnossiene_table.png" alt = "table with the first few notes for Gnossienne No. 1, a test song">
 </p>
 
 While reading from the data table wasn't too difficult, I struggled a lot with types in Unreal (FStrings and FNames weren't exactly intuitive).
