@@ -1,6 +1,3 @@
-# Chord Clash Development Portfolio
-### Jade Logan
-
 Chord Clash is a two-player rhythm game where players deal damage to each other based on the accuracy of their hits, using powerups spawned during the games to gain advantages. I was on the tech team and worked on game logic and level design. My initial responsibilities included implementing a system for spawning notes timed to the rhythm of a song, moving the notes along a set path, and assessing player accuracy when hitting notes.
 
 ## Timing
