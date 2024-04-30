@@ -14,7 +14,7 @@ My initial attempt involved data tables and timers, using C++ rather than Bluepr
 
 I first used [Reaper](https://www.reaper.fm/) to map out all of the times I wanted a note to play at a certain lane. These times were inputted into a Google Sheet and exported a CSV.
 <p align="center">
-  <img src = "/images/gnossienne_table.png" alt = "table with the first few notes for Gnossienne No. 1, a test song" height = 200>
+  <img src = "images/gnossienne_table.png" alt = "table with the first few notes for Gnossienne No. 1, a test song" height = 200>
 </p>
 
 While reading from the data table wasn't too difficult, I struggled a lot with types in Unreal (FStrings and FNames weren't exactly intuitive).
@@ -77,13 +77,13 @@ While I couldn't find many tutorials related to rhythm games in Unreal (particul
 I still used Reaper to get the timing of notes correct, then created a sequence with an actor for spawning notes bound to it (this actor, NoteSpawner, handled most note-related functions). It had a trigger event track with 4 sections to easily keep track of which lanes a note was being fired from. All of the keys connected to an event in the NoteSpawner, with the lane as the only variable. When all of the keys were in the right spot, they were dragged back by two seconds so that they would hit the bar at the correct time after moving downwards. Besides being a very tedious task, I also had some trouble with getting the keys bound to the event. When I went into properties, the correct event didn't always show up, and I kept accidentally creating new events. Looking back (after doing the same process for multiple songs), there had likely been a key I was binding incorrectly and then copied, causing the issue to be present throughout the song.
 
 <p align="center">
-  <img src = "/images/keyProperties.png" alt = "right clicking to show properties for a key">
+  <img src = "images/keyProperties.png" alt = "right clicking to show properties for a key">
 </p>
 
 The timing worked with no gap between the event firing and the note spawning, and lag messing with the sync was a non-issue because both the audio and the note spawning were tied to the sequence.
 
 <p align="center">
-  <img src = "/images/test.gif" alt = "test with sequences for timing">
+  <img src = "images/test.gif" alt = "test with sequences for timing">
 </p>
 
 ## Note Queue
@@ -94,10 +94,10 @@ I originally wanted to organize the queues with 2D arrays, only to discover that
 
 
 <p align="center">
-  <img src = "/images/addToQueueOld.png" alt = "old version of AddToQueue">
+  <img src = "images/addToQueueOld.png" alt = "old version of AddToQueue">
 </p>
 <p align="center">
-  <img src = "/images/getQueue0Old.png" alt = "old version of GetQueue0">
+  <img src = "images/getQueue0Old.png" alt = "old version of GetQueue0">
 </p>
 
 I tried to get this method of accessing the queues to work, with many different variations, but kept running into the issue of the function accessing "none". It's likely that I didn't initialize something correctly, but for the sake of time I needed to move on from using the maps and structs, even if it meant messier code.
@@ -105,13 +105,13 @@ I tried to get this method of accessing the queues to work, with many different 
 I ended up creating 8 arrays that are accessed using switch statements.
 
 <p align="center">
-  <img src = "/images/addToQueue.png" alt = "new AddToQueue">
+  <img src = "images/addToQueue.png" alt = "new AddToQueue">
 </p>
 
 When a note is accessed using a queue, the current position of the sprite is sent to a function that checks the accuracy. There are 4 ranges for a hit based on how close the current position is to the target position: Perfect, Great, Good, and Bad. Misses are handled separately. After a score is determined based on the ranges, the score is updated with another function. The NoteSpawner has an array of custom structs containing a score for each player. The index of this array corresponds to the number of the note (first note to spawn having a spawn number of 0). When the score is updated for a note, the function checks if both players' scores have been updated. If this is the case, then damage is calculated based on the difference in accuracy.
 
 <p align="center">
-  <img src = "/images/checkAccuracy.png" alt = "part of the check accuracy function">
+  <img src = "images/checkAccuracy.png" alt = "part of the check accuracy function">
 </p>
 
 When a note passes the range where it can be hit and removes itself from the queue, it sets the score to miss for any player that does not have a score already associated with that note.
@@ -134,7 +134,7 @@ I wanted to avoid using regular audio players for the singers because of lag. If
 I was initially able to get the switch to happen smoothly using subsequences. There were two subsequences that each had just the audio for the singer. An event track in the main sequence had keys for every point I wanted the singers to possibly switch. When the event was triggered, the correct subsequence was deactivated using loops to go through tracks and disable every section.
 
 <p align="center">
-  <img src = "/images/og_sequence.png" alt = "original sequence with subsequences for singers">
+  <img src = "images/og_sequence.png" alt = "original sequence with subsequences for singers">
 </p>
 
 As it turns out, the set active function is just for development. Unlike functions like Print String that make it very clear they only function in development, I had no idea activating/deactivating sections wouldn't work until we built the project. 
@@ -146,7 +146,7 @@ The last method I tried that still involved sequences was changing the bindings,
 Finally, I used audio played by a SingerManager actor, which had an event track on the sequence. On a switch, the volume would change depending on player health. Both audio files were primed before the sequence so they would start immediately in sync with the sequence. When the sequence lagged, and the singers were ahead. To solve this, instead of playing once at the beginning of the sequence and changing volume, the audio is repeatedly played and stopped. The switch event on the sequence passes along the current time so the audio can be played from that moment. That way, if the sequence lags, the singers are only out of sync until the next switch.
 
 <p align="center">
-  <img src = "/images/singerswitch.png" alt = "SingerManager switching based on health">
+  <img src = "images/singerswitch.png" alt = "SingerManager switching based on health">
 </p>
 
 ## Calibration
@@ -156,7 +156,7 @@ An offset was added to the notespawner that would affect the calculations for ac
 The removal from queue call happens after the note finishes moving just past the bar, so I was able to fix the issues with the queue removal timing by changing movement rather than adding delays. The note moves further down, with the distance and timing dependent on the offset. There is no visual difference, but it ensures a note will not be removed before the player has the chance to hit it.
 
 <p align="center">
-  <img src = "/images/movementOffset.png" alt = "movement with offset">
+  <img src = "images/movementOffset.png" alt = "movement with offset">
 </p>
 
 To calibrate, players manually adjust the offset while playing a calibration sequence that plays the same note over and over again. This sequence works exactly the same as the main song sequences, with powerups disabled and no health/damage.
@@ -174,7 +174,7 @@ I worked primarily with the NoteSpawner class Blueprint, Arrow Object class Blue
 Below is a rough statechart diagram of our game, with more detail for the Play Song state (the states pictured inside this one are referencing the NoteSpawner actor's actions during this period of the game).
 
 <p align="center">
-  <img src = "/images/statechart.png" alt = "statechart diagram">
+  <img src = "images/statechart.png" alt = "statechart diagram">
 </p>
 
 ## Lessons Learned
