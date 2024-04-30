@@ -169,7 +169,7 @@ We used channels in the team Discord server to effectively communicate changes t
         
 ## Architecture 
 
-I worked primarily with the NoteSpawner class Blueprint, Arrow Object class Blueprint, and sequence Blueprints. 
+I worked primarily with the NoteSpawner class Blueprint, Arrow Object class Blueprint, and sequence Blueprints, along with the level Blueprint to connect everything. 
 
 Below is a rough statechart diagram of our game, with more detail for the Play Song state (the states pictured inside this one are referencing the NoteSpawner actor's actions during this period of the game).
 
