@@ -159,7 +159,7 @@ The removal from queue call happens after the note finishes moving just past the
   <img src = "/images/movementOffset.png" alt = "movement with offset">
 </p>
 
-To calibrate, players manually adjust the offset while playing a calibration sequence that plays the same note over and over again.
+To calibrate, players manually adjust the offset while playing a calibration sequence that plays the same note over and over again. This sequence works exactly the same as the main song sequences, with powerups disabled and no health/damage.
 
 ## Version Control
 
@@ -167,7 +167,10 @@ We used GitHub as our version control software, which generally went smoothly fo
 
 We used channels in the team Discord server to effectively communicate changes that were made to avoid conflicts. There was a bot that updated us to any changes in the GitHub repository, a channel for telling team members when a pull request was made and asking for reviews, and a channel for people to say when they started and finished working with certain Blueprints.
         
-## Diagrams 
+## Architecture 
+<p align="center">
+  <img src = "/images/statechart.png" alt = "statechart diagram">
+</p>
 
 ## Lessons Learned
 
