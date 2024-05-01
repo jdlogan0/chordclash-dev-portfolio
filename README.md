@@ -1,4 +1,12 @@
+<p align="center">
+  <img src = "images/environment.png" alt = "the stage, outside of gameplay">
+</p>
+
 Chord Clash is a two-player rhythm game where players deal damage to each other based on the accuracy of their hits, using powerups spawned during the games to gain advantages. I was on the tech team and worked on game logic and level design. My initial responsibilities included implementing a system for spawning notes timed to the rhythm of a song, moving the notes along a set path, and assessing player accuracy when hitting notes.
+
+<p align="center">
+  <img src = "images/powerup.gif" alt = "playing the game to showcase powerups">
+</p>
 
 ## Timing
 
@@ -158,6 +166,10 @@ The removal from queue call happens after the note finishes moving just past the
 </p>
 
 To calibrate, players manually adjust the offset while playing a calibration sequence that plays the same note over and over again. This sequence works exactly the same as the main song sequences, with powerups disabled and no health/damage.
+
+<p align="center">
+  <img src = "images/calibration.gif" alt = "calibration sequence">
+</p>
 
 ## Version Control
 
