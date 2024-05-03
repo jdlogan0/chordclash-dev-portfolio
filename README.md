@@ -2,7 +2,7 @@
   <img src = "images/environment.png" alt = "the stage, outside of gameplay">
 </p>
 
-Chord Clash is a two-player rhythm game where players deal damage to each other based on the accuracy of their hits, using powerups spawned during the games to gain advantages. I was on the tech team and worked on game logic and level design. My initial responsibilities included implementing a system for spawning notes timed to the rhythm of a song, moving the notes along a set path, and assessing player accuracy when hitting notes.
+[Chord Clash](https://sites.google.com/view/chordclash/home) is a two-player rhythm game where players deal damage to each other based on the accuracy of their hits, using powerups spawned during the games to gain advantages. I was on the tech team and worked on game logic and level design. My initial responsibilities included implementing a system for spawning notes timed to the rhythm of a song, moving the notes along a set path, and assessing player accuracy when hitting notes.
 
 <p align="center">
   <img src = "images/powerup.gif" alt = "playing the game to showcase powerups">
