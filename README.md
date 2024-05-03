@@ -20,7 +20,7 @@ My initial attempt involved data tables and timers, using C++ rather than Bluepr
 
 I first used [Reaper](https://www.reaper.fm/) to map out all of the times I wanted a note to play at a certain lane. These times were inputted into a Google Sheet and exported a CSV.
 <p align="center">
-  <img src = "images/gnossienne_table.png" alt = "table with the first few notes for Gnossienne No. 1, a test song" height = 200>
+  <img src = "images/gnossienne_table.png" alt = "table with the first few notes for Gnossienne No. 1, a test song">
 </p>
 
 While reading from the data table wasn't too difficult, I struggled a lot with types in Unreal (FStrings and FNames weren't exactly intuitive).
